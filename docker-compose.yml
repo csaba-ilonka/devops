@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+
+    # https://jfrog.com/open-source/#artifactory
+    artifactory:
+        container_name: artifactory
+        image: docker.bintray.io/jfrog/artifactory-oss:7.7.3
+        ports:
+            - 11001:8081
+            - 11002:8082
+        volumes:
+            - artifactory-data:/var/opt/jfrog/artifactory
+        restart: always
+        logging:
+            driver: json-file
+            options:
+                max-size: "50m"
+                max-file: "10"
+        ulimits:
+            nproc: 65535
+            nofile:
+                soft: 32000
+                hard: 40000
+    
+    # https://www.jenkins.io/
+    jenkins:
+        container_name: jenkins
+        image: jenkins/jenkins:lts
+        ports:
+            - 11010:8080
+        volumes:
+            - jenkins-data:/var/jenkins_home
+        restart: always
+    
+    # https://structurizr.com/
+    structurizr:
+        container_name: structurizr
+        build:
+            context: ./structurizr
+            args:
+                - STRUCTURIZR_BUILD=2094
+                - STRUCTURIZR_LICENSE_FILE=${DOCKER_LOCAL}/config/devops/structurizr/structurizr.properties
+        ports:
+            - 11020:8080
+        environment:
+            - STRUCTURIZR_PLANTUML=http://plantuml.com/plantuml
+            - STRUCTURIZR_GRAPHVIZ=true
+        volumes:
+            - structurizr-data:/usr/local/structurizr
+        restart: always
+
+volumes:
+    artifactory-data:
+    jenkins-data:
+    structurizr-data:
