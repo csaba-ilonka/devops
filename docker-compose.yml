@@ -1,8 +1,14 @@
 version: '3.8'
 
+# ${DOCKER_LOCAL} is an environment variable on the host. It contains the absoulte path of folder. 
+#                 This is the base folder for all docker related files stored outside of the VM.
+
 services:
 
     # https://jfrog.com/open-source/#artifactory
+    #
+    # Local repository for build artifacts.
+    # Port range: 11000-11009
     artifactory:
         container_name: artifactory
         image: docker.bintray.io/jfrog/artifactory-oss:7.7.3
@@ -24,6 +30,9 @@ services:
                 hard: 40000
     
     # https://www.jenkins.io/
+    #
+    # Project management tool to plan/follow projects and store related documents.
+    # Port range: 11010-11019
     jenkins:
         container_name: jenkins
         image: jenkins/jenkins:lts
@@ -34,6 +43,9 @@ services:
         restart: always
     
     # https://structurizr.com/
+    #
+    # Software system design tool.
+    # Port range: 11020-11029
     structurizr:
         container_name: structurizr
         build:
@@ -49,8 +61,24 @@ services:
         volumes:
             - structurizr-data:/usr/local/structurizr
         restart: always
+    
+    # https://www.postgresql.org/
+    #
+    # Dummy database for quick prototyping.
+    # Port range: 11030-11039
+    postgres:
+        container_name: postgres
+        image: postgres:13-alpine
+        ports:
+            - 11032:5432
+        env_file:
+            - ${DOCKER_LOCAL}/env/devops/postgres/postgres.env
+        volumes:
+            - postgres-data:/var/lib/postgresql/data
+        restart: always
 
 volumes:
     artifactory-data:
     jenkins-data:
     structurizr-data:
+    postgres-data:
