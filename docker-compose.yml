@@ -1,7 +1,7 @@
 version: '3.8'
 
-# ${DOCKER_LOCAL} is an environment variable on the host. It contains the absoulte path of folder. 
-#                 This is the base folder for all docker related files stored outside of the VM.
+# ${DOCKER_HOST} is an environment variable on the host. It contains the absoulte path of a folder. 
+#                This is the base folder for all docker related files stored outside of the VM.
 
 services:
 
@@ -52,7 +52,7 @@ services:
             context: ./structurizr
             args:
                 - STRUCTURIZR_BUILD=2094
-                - STRUCTURIZR_LICENSE_FILE=${DOCKER_LOCAL}/config/devops/structurizr/structurizr.properties
+                - STRUCTURIZR_LICENSE_FILE=${DOCKER_HOST}/config/devops/structurizr/structurizr.properties
         ports:
             - 11020:8080
         environment:
@@ -72,9 +72,26 @@ services:
         ports:
             - 11032:5432
         env_file:
-            - ${DOCKER_LOCAL}/env/devops/postgres/postgres.env
+            - ${DOCKER_HOST}/env/devops/postgres/postgres.env
         volumes:
             - postgres-data:/var/lib/postgresql/data
+        restart: always
+    
+    # https://www.pgadmin.org/
+    #
+    # Postgres client application.
+    # Port range: 11040-11049
+    pgadmin:
+        container_name: pgadmin
+        image: dpage/pgadmin4:4.25
+        ports:
+            - 11040:80
+        env_file: 
+            - ${DOCKER_HOST}/env/devops/pgadmin/pgadmin.env
+        volumes:
+            - pgadmin-data:/var/lib/pgadmin
+        links:
+            - postgres:postgres-dummy
         restart: always
 
 volumes:
@@ -82,3 +99,4 @@ volumes:
     jenkins-data:
     structurizr-data:
     postgres-data:
+    pgadmin-data:
